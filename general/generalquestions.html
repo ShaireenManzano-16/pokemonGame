@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.cdnfonts.com/css/deadcrt" rel="stylesheet">
+    <title>General Questions</title>
+    <style>
+        @font-face {
+            font-family: 'ArcadeClassic';
+            src: url('intro/ArcadeClassic.ttf') format('truetype'); /* Ensure the font file exists */
+        }
+
+        body {
+            background: url('../intro/AIM LOOK OF THE OUTLINE.gif') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'DEADCRT', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            margin: 0;
+            justify-content: center;
+        }
+
+        .dialogue-box {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            background: linear-gradient(to bottom, #bbb, #888);
+            border: 6px solid #00C08D;
+            padding: 15px;
+            box-shadow: 4px 4px 0px black;
+            text-align: center;
+            font-size: 12px;
+            width: 80%;
+            max-width: 600px;
+            opacity: 0;
+        }
+
+        #choices {
+            position: absolute;
+            top: 35%;
+            left: 25%;
+            transform: translateX(-50%);
+            display: none;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 4px 4px 0px black;
+            text-align: center;
+            font-size: 8px;
+            width: 50%;
+            max-width: 550px;
+          
+            
+        }
+
+        .choice-box {
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        a {
+            text-decoration: none !important;
+            color: black;
+        }
+
+        .arrow {
+            display: none;
+        }
+
+        .selected {
+            background: #fafafa;
+        }
+
+        .typing {
+            display: inline-block;
+            border-right: 2px solid white;
+            overflow-wrap: break-word;
+            white-space: normal;
+            animation: blinkCursor 0.7s steps(2) infinite;
+        }
+
+        #character {
+            position: absolute;
+            width: 90px;
+            bottom: 0;
+            left: 90px; /* Start slightly from the left */
+            transition: 0.1s linear;
+        }
+
+        #teacher {
+            width: 95px;
+            position: relative;
+            left: -40px;
+            top: 35px;
+        }
+        /* MODAL STYLING */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 30%;
+            left: 25%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px white;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            width: 300px;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            #choices {
+                width: 90%;
+            }
+            .dialogue-box {
+                width: 25%;
+            }
+            #character, #teacher {
+                width: 15%;
+            }
+        }
+        #teacher {
+            position: relative;
+            left: -40px;
+            top: 35px;
+        }
+        
+
+    </style>
+</head>
+<body>
+
+    <div id="dialogue" class="dialogue-box">
+        <span id="dialogue-text" class="typing"></span>
+    </div>
+
+    <div id="choices">
+        <div class="choice-box" onclick="selectChoice(this, '../Science/index.html')">
+            <span class="arrow">➡️</span>
+            <span class="choice-text typing" data-text="A) Unlocking the universe’s secrets"></span>
+        </div>
+        <div class="choice-box" onclick="selectChoice(this, '../Technology/index.html')">
+            <span class="arrow">➡️</span>
+            <span class="choice-text typing" data-text="B) Inventing the next big thing"></span>
+        </div>
+        <div class="choice-box" onclick="selectChoice(this, '../Engineering/index.html')">
+            <span class="arrow">➡️</span>
+            <span class="choice-text typing" data-text="C) Bringing ideas to life"></span>
+        </div>
+        <div class="choice-box" onclick="selectChoice(this, '../Mathematics/index.html')">
+            <span class="arrow">➡️</span>
+            <span class="choice-text typing" data-text="D) Decoding the world"></span>
+        </div>
+        <div class="choice-box" onclick="selectChoice(this, '../Medical/index.html')">
+            <span class="arrow">➡️</span>
+            <span class="choice-text typing" data-text="E) Saving lives and pushing human limits"></span>
+        </div>
+    </div>
+
+    <img id="teacher" src="../intro/teacher that mc will approach for the qwuestion.png" alt="teacher">
+    <img id="character" src="../intro/front stand.png" alt="Character">
+
+    <audio id="bg-music" autoplay loop>
+        <source src="../intro/valma hymm bit 8.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div id="modal" class="modal">Great choice!</div>
+    <script>
+        const character = document.getElementById("character");
+        const dialogue = document.getElementById("dialogue");
+        const dialogueText = document.getElementById("dialogue-text");
+        const choices = document.getElementById("choices");
+        const choiceTexts = document.querySelectorAll(".choice-text");
+
+        let x = 90;
+        let y = window.innerHeight - 100;
+        let direction = "up";
+
+        function moveCharacter() {
+            if (direction === "up") {
+                y -= 5;
+                character.src = "../intro/back stand.png";
+                if (y <= window.innerHeight / 2) direction = "right";
+            } 
+            else if (direction === "right") {
+                x += 5;
+                character.src = "../intro/right walk.png";
+
+                if (x >= window.innerWidth * 0.35) { // Stop at 35% of page width
+                    direction = "stop";
+                    character.src = "../intro/right stand.png";
+                    
+                    clearInterval(movement);
+
+                    setTimeout(() => {
+                        showDialogue("Which of these thrills you the most?", () => {
+                            setTimeout(() => {
+                                showChoices();
+                            }, 1000);
+                        });
+                    }, 500);
+                }
+            }
+
+            if (direction !== "done") {
+                character.style.left = `${x}px`;
+                character.style.top = `${y}px`;
+            }
+        }
+
+        let movement = setInterval(moveCharacter, 100);
+
+        function showDialogue(text, callback) {
+            dialogue.style.display = "block";
+            dialogue.style.opacity = "1";
+            dialogueText.innerHTML = "";  
+
+            let i = 0;
+            function typeEffect() {
+                if (i < text.length) {
+                    dialogueText.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeEffect, 50);
+                } else {
+                    if (callback) callback();
+                }
+            }
+            typeEffect();
+        }
+
+        function showChoices() {
+            choices.style.display = "block";
+            choiceTexts.forEach((element, index) => {
+                element.innerHTML = "";  
+                setTimeout(() => {
+                    typeChoiceText(element, element.getAttribute("data-text"));
+                }, index * 500);  
+            });
+        }
+
+        function typeChoiceText(element, text) {
+            let i = 0;
+            function typeEffect() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeEffect, 30);
+                }
+            }
+            typeEffect();
+        }
+        
+        function selectChoice(selected, link) {
+    document.querySelectorAll(".choice-box").forEach(choice => {
+        choice.classList.remove("selected");
+        choice.querySelector(".arrow").style.display = "none"; // Hide all other arrows
+    });
+
+    selected.classList.add("selected");
+    
+    // Make sure the arrow is visible
+    const arrow = selected.querySelector(".arrow");
+    if (arrow) {
+        arrow.style.display = "inline-block"; // Ensure arrow is shown
+    }
+
+    // Hide dialogue and choices box
+    dialogue.style.display = "none";
+    choices.style.display = "none";
+
+    // Show the modal
+    const modal = document.createElement("div");
+    modal.id = "modal";
+    modal.innerText = "Great choice!";
+    modal.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 20%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px white;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        width: 300px;
+        display: block;
+    `;
+    document.body.appendChild(modal);
+
+    // Redirect after delay
+    setTimeout(() => {
+        window.location.href = link;
+    }, 2000);  // 1-second delay
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+        let bgMusic = document.getElementById("bg-music");
+
+        function playAudio() {
+            bgMusic.play().catch(error => console.log("Autoplay blocked:", error));
+            document.removeEventListener("click", playAudio); // Remove event listener after first click
+        }
+
+        document.addEventListener("click", playAudio); // Start audio on first user interaction
+    });
+
+    </script>
+
+</body>
+</html>
